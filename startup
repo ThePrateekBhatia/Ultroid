@@ -15,4 +15,10 @@ echo "
 
 "
 
+# Start the health check server for Koyeb
+if [ -n "$KOYEB_SERVICE_ID" ]; then
+  python3 koyeb_healthcheck.py &
+fi
+
+# Start the main Ultroid bot
 python3 -m pyUltroid
