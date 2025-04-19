@@ -3,18 +3,38 @@
 # This file is a part of < https://github.com/TeamUltroid/Ultroid/ >
 # PLease read the GNU Affero General Public License in <https://www.github.com/TeamUltroid/Ultroid/blob/main/LICENSE/>.
 
-FROM theteamultroid/ultroid:main
+FROM python:3.10-slim-buster
 
-# set timezone
-ENV TZ=Asia/Kolkata
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+# Set environment variables
+ENV PIP_NO_CACHE_DIR=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    TZ=Asia/Kolkata
 
-COPY installer.sh .
+# Set working directory
+WORKDIR /app
 
-RUN bash installer.sh
+# Install required system packages
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git \
+    ffmpeg \
+    mediainfo \
+    neofetch \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# changing workdir
-WORKDIR "/root/TeamUltroid"
+# Copy requirements
+COPY requirements.txt .
+COPY resources/startup/optional-requirements.txt .
 
-# start the bot.
+# Install dependencies
+RUN pip install -U pip && pip install --no-cache-dir -r requirements.txt && pip install --no-cache-dir -r optional-requirements.txt
+
+# Copy project files
+COPY . .
+
+# Set port for Koyeb
+EXPOSE 8080
+
+# Run the application
 CMD ["bash", "startup"]

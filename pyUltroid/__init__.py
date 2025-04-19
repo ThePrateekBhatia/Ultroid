@@ -29,6 +29,10 @@ if run_as_module:
     from .startup.funcs import _version_changes, autobot, enable_inline, update_envs
     from .version import ultroid_version
 
+    # Check if deployment is Heroku or Koyeb
+    import os
+    HOSTED_ON = os.environ.get("DYNO") and "heroku" or "KOYEB_SERVICE_ID" in os.environ and "koyeb" or ""
+
     if not os.path.exists("./plugins"):
         LOGS.error(
             "'plugins' folder not found!\nMake sure that, you are on correct path."

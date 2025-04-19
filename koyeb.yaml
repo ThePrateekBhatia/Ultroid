@@ -1,0 +1,41 @@
+name: ultroid-userbot
+service:
+  name: ultroid
+  type: web
+  ports:
+    - port: 8080
+      protocol: http
+  env:
+    - name: API_ID
+      value: null
+      reference: null
+    - name: API_HASH
+      value: null
+      reference: null
+    - name: SESSION
+      value: null
+      reference: null
+    - name: REDIS_URI
+      value: null
+      reference: null
+    - name: REDIS_PASSWORD
+      value: null
+      reference: null
+    - name: BOT_TOKEN
+      value: null
+      reference: null
+    - name: LOG_CHANNEL
+      value: "0"
+      reference: null
+    - name: HEROKU_API
+      value: null
+      reference: null
+    - name: HEROKU_APP_NAME
+      value: null
+      reference: null
+  docker:
+    image: koyeb/push
+    buildpack: docker
+  routes:
+    - path: /
+      port: 8080 
