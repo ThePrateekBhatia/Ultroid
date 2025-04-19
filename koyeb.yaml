@@ -2,6 +2,8 @@ name: ultroid-userbot
 service:
   name: ultroid
   type: web
+  instance_type: free
+  instances_min: 0
   ports:
     - port: 8080
       protocol: http

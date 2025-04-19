@@ -21,7 +21,7 @@ Before you begin, make sure you have:
 
 2. **Deploy to Koyeb**
    - Click the Deploy to Koyeb button on the main page of this repository
-   - Or use this direct link: [Deploy to Koyeb](https://app.koyeb.com/deploy?type=git&repository=github.com/TeamUltroid/Ultroid&branch=main&name=ultroid)
+   - Or use this direct link: [Deploy to Koyeb](https://app.koyeb.com/deploy?name=ultroid&repository=ThePrateekBhatia%2FUltroid&branch=main&instance_type=free&instances_min=0)
 
 3. **Configure Environment Variables**
    - During Koyeb deployment, set the following environment variables:
