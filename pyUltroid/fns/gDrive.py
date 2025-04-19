@@ -5,6 +5,11 @@
 # PLease read the GNU Affero General Public License in
 # <https://github.com/TeamUltroid/pyUltroid/blob/main/LICENSE>.
 
+# Plugin By - @XRoiDX
+# From @TeleBotHelpBot
+# Credits @AbirHasan2005
+
+import os
 import time
 from io import FileIO
 from logging import WARNING
@@ -26,19 +31,35 @@ for log in [LOGGER, logger, _logger]:
 
 class GDriveManager:
     def __init__(self):
+        self.token_file = os.path.join("resources/auth", "gdrive_token.txt")
+        self._build = None
+        self._http = None
         self._flow = {}
+        self.folder_id = udB.get_key("GDRIVE_FOLDER_ID")
         self.gdrive_creds = {
-            "oauth_scope": [
+            "json": [
+                udB.get_key("GDRIVE_JSON"),
+                udB.get_key("GDRIVE_CLIENT_JSON"),
+                os.environ.get("GDRIVE_JSON"),
+                os.environ.get("GDRIVE_CLIENT_JSON"),
+            ],
+            "redirect_uri": "http://localhost",
+            "scopes": [
                 "https://www.googleapis.com/auth/drive",
                 "https://www.googleapis.com/auth/drive.file",
-                "https://www.googleapis.com/auth/drive.metadata",
+                "https://www.googleapis.com/auth/drive.appdata",
+                "https://www.googleapis.com/auth/drive.apps.readonly",
             ],
             "dir_mimetype": "application/vnd.google-apps.folder",
-            "redirect_uri": OOB_CALLBACK_URN,
+            "oauth_scope": " ".join(
+                [
+                    "https://www.googleapis.com/auth/drive",
+                    "https://www.googleapis.com/auth/drive.file",
+                    "https://www.googleapis.com/auth/drive.appdata",
+                    "https://www.googleapis.com/auth/drive.apps.readonly",
+                ]
+            ),
         }
-        self.auth_token = udB.get_key("GDRIVE_AUTH_TOKEN")
-        self.folder_id = udB.get_key("GDRIVE_FOLDER_ID")
-        self.token_file = "resources/auth/gdrive_creds.json"
 
     @staticmethod
     def _create_download_link(fileId: str):
@@ -49,17 +70,16 @@ class GDriveManager:
         return f"https://drive.google.com/folderview?id={folderId}"
 
     def _create_token_file(self, code: str = None):
-        if code and self._flow:
-            _auth_flow = self._flow["_"]
-            credentials = _auth_flow.step2_exchange(code)
+        if code:
+            credentials = self._flow["_"].step2_exchange(code)
             Storage(self.token_file).put(credentials)
             return udB.set_key("GDRIVE_AUTH_TOKEN", str(open(self.token_file).read()))
         try:
             _auth_flow = OAuth2WebServerFlow(
                 udB.get_key("GDRIVE_CLIENT_ID")
-                or "458306970678-jhfbv6o5sf1ar63o1ohp4c0grblp8qba.apps.googleusercontent.com",
+                or "YOUR_CLIENT_ID_HERE",
                 udB.get_key("GDRIVE_CLIENT_SECRET")
-                or "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",
+                or "YOUR_CLIENT_SECRET_HERE",
                 self.gdrive_creds["oauth_scope"],
                 redirect_uri=self.gdrive_creds["redirect_uri"],
             )
