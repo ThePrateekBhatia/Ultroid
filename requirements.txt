@@ -1,6 +1,5 @@
-# Important Requirements here.
+# Core requirements for Ultroid Heroku deployment
 telethon
-https://github.com/New-dev0/Telethon-Patch/archive/main.zip
 python-decouple
 python-dotenv
 telegraph
@@ -9,3 +8,12 @@ requests
 aiohttp
 catbox-uploader
 cloudscraper
+heroku3
+gitpython
+psutil
+pypdf2>=1.26.0
+pytz
+qrcode
+tgcrypto
+yt-dlp
+flask
