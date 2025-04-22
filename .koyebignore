@@ -1,0 +1,40 @@
+# Git files
+.git
+.github
+.gitignore
+
+# Development files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+
+# Docker files not needed for Koyeb
+docker-compose.yml
+heroku.yml
+okteto-pipeline.yml
+
+# Install scripts for other platforms
+install-termux
+installer.sh
+
+# Local configuration
+.env
+.env.example
+
+# Session files (should be provided as env vars, not files)
+*.session
+*.session-journal
+
+# Logs and databases
+*.log
+*.sql
+*.sqlite
+
+# Other unnecessary files for deployment
+LICENSE
+CONTRIBUTING.md
+CODE_OF_CONDUCT.md

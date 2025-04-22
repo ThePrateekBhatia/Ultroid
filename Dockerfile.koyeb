@@ -1,0 +1,56 @@
+FROM python:3.10-slim
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV TZ=Asia/Kolkata
+
+# Create working directory
+WORKDIR /app
+
+# Install necessary packages
+RUN apt-get update && apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends \
+    git \
+    curl \
+    sudo \
+    wget \
+    python3-dev \
+    ffmpeg \
+    neofetch \
+    mediainfo \
+    p7zip-full \
+    jq \
+    libglib2.0-dev \
+    pv \
+    build-essential \
+    gcc \
+    g++ \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements and install
+COPY requirements.txt .
+# Use a multi-step installation with binary wheels to avoid compilation
+RUN pip install -U pip && \
+    pip install wheel setuptools && \
+    # Install pycryptodomex from binary wheels (avoiding source compilation)
+    pip install --only-binary :all: pycryptodomex==3.9.9 && \
+    # Remove pycryptodomex from requirements as we've installed it already
+    grep -v "pycryptodomex" requirements.txt > requirements_filtered.txt && \
+    pip install -U -r requirements_filtered.txt
+
+# Copy the project
+COPY . .
+
+# Make startup script executable
+RUN chmod +x startup
+
+# Expose port for health checks (Koyeb requires this)
+EXPOSE 8080
+
+# Create a simple health check server
+RUN echo 'import http.server\nimport socketserver\nimport os\nimport threading\nimport time\n\ndef run_server():\n    PORT = int(os.environ.get("PORT", 8080))\n    Handler = http.server.SimpleHTTPRequestHandler\n    with socketserver.TCPServer(("", PORT), Handler) as httpd:\n        print(f"Serving health check at port {PORT}")\n        httpd.serve_forever()\n\n# Start the server in a thread\nserver_thread = threading.Thread(target=run_server)\nserver_thread.daemon = True\nserver_thread.start()\n\n# Continue with the main application\nos.system("bash startup")' > health_server.py
+
+# Start both the health check server and the bot
+CMD ["python", "health_server.py"]

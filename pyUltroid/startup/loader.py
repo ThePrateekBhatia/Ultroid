@@ -63,19 +63,30 @@ def load_other_plugins(addons=None, pmbot=None, manager=None, vcbot=None):
             _ast_exc.append("games")
         Loader(path="assistant").load(
             log=False, exclude=_ast_exc, after_load=_after_load
-        )
-
-    # for addons
+        )    # for addons
     if addons:
         if url := udB.get_key("ADDONS_URL"):
             subprocess.run(f"git clone -q {url} addons", shell=True)
         if os.path.exists("addons") and not os.path.exists("addons/.git"):
             rmtree("addons")
         if not os.path.exists("addons"):
-            subprocess.run(
-                f"git clone -q -b {Repo().active_branch} https://github.com/TeamUltroid/UltroidAddons.git addons",
-                shell=True,
-            )
+            try:
+                # Try to get the active branch, but use 'main' as fallback for Koyeb
+                try:
+                    active_branch = Repo().active_branch
+                except (TypeError, ValueError):
+                    active_branch = "main"  # Default to main for detached HEAD state
+                
+                subprocess.run(
+                    f"git clone -q -b {active_branch} https://github.com/TeamUltroid/UltroidAddons.git addons",
+                    shell=True,
+                )
+            except Exception:
+                # If branch detection fails, just clone without specifying branch
+                subprocess.run(
+                    "git clone -q https://github.com/TeamUltroid/UltroidAddons.git addons",
+                    shell=True,
+                )
         else:
             subprocess.run("cd addons && git pull -q && cd ..", shell=True)
 

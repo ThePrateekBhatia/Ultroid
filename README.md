@@ -1,127 +1,67 @@
-<p align="center">
-  <img src="./resources/extras/logo_readme.jpg" alt="TeamUltroid Logo">
-</p>
-<h1 align="center">
-  <b>Ultroid - UserBot</b>
-</h1>
+# Ultroid UserBot - Koyeb Edition
 
-<b>A stable pluggable Telegram userbot + Voice & Video Call music bot, based on Telethon.</b>
+This is a fork of the popular [Ultroid UserBot](https://github.com/TeamUltroid/Ultroid) specifically optimized for deployment on [Koyeb](https://www.koyeb.com/).
 
-[![](https://img.shields.io/badge/Ultroid-v0.8-crimson)](#)
-[![Stars](https://img.shields.io/github/stars/TeamUltroid/Ultroid?style=flat-square&color=yellow)](https://github.com/TeamUltroid/Ultroid/stargazers)
-[![Forks](https://img.shields.io/github/forks/TeamUltroid/Ultroid?style=flat-square&color=orange)](https://github.com/TeamUltroid/Ultroid/fork)
-[![Size](https://img.shields.io/github/repo-size/TeamUltroid/Ultroid?style=flat-square&color=green)](https://github.com/TeamUltroid/Ultroid/)   
-[![Python](https://img.shields.io/badge/Python-v3.10.3-blue)](https://www.python.org/)
-[![CodeFactor](https://www.codefactor.io/repository/github/teamultroid/ultroid/badge/main)](https://www.codefactor.io/repository/github/teamultroid/ultroid/overview/main)
-[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/TeamUltroid/Ultroid/graphs/commit-activity)
-[![Docker Pulls](https://img.shields.io/docker/pulls/theteamultroid/ultroid?style=flat-square)](https://img.shields.io/docker/pulls/theteamultroid/ultroid?style=flat-square)   
-[![Open Source Love svg2](https://badges.frapsoft.com/os/v2/open-source.svg?v=103)](https://github.com/TeamUltroid/Ultroid)
-[![Contributors](https://img.shields.io/github/contributors/TeamUltroid/Ultroid?style=flat-square&color=green)](https://github.com/TeamUltroid/Ultroid/graphs/contributors)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://makeapullrequest.com)
-[![License](https://img.shields.io/badge/License-AGPL-blue)](https://github.com/TeamUltroid/Ultroid/blob/main/LICENSE)   
-[![Sparkline](https://stars.medv.io/Teamultroid/Ultroid.svg)](https://stars.medv.io/TeamUltroid/Ultroid)
-----
+## Deployment on Koyeb
 
-# Deploy
-- [Heroku](#deploy-to-heroku)
-- [Okteto](#deploy-to-okteto)
-- [Local Machine](#deploy-locally)
+### Easy Deployment Method
+Click the button below to deploy to Koyeb:
 
-# Documentation 
-[![Documentation](https://img.shields.io/badge/Documentation-Ultroid-blue)](http://ultroid.tech/)
+[![Deploy to Koyeb](https://www.koyeb.com/static/images/deploy/button.svg)](https://app.koyeb.com/deploy?type=git&repository=github.com/ThePrateekBhatia/Ultroid&branch=main&name=ultroid-userbot)
 
-# Tutorial 
-- Full Tutorial - [![Full Tutorial](https://img.shields.io/badge/Watch%20Now-blue)](https://www.youtube.com/watch?v=0wAV7pUzhDQ)
+### Manual Deployment Steps
 
-- Tutorial to get Redis URL and password - [here.](./resources/extras/redistut.md)
----
+1. **Fork this repository**:
+   Fork this repository to your GitHub account.
 
-## Deploy to Heroku
-Get the [Necessary Variables](#Necessary-Variables) and then click the button below!  
+2. **Create a Koyeb account**:
+   Sign up for a [Koyeb account](https://app.koyeb.com/auth/signup) if you don't have one.
 
-<summary>Deploy To Heroku</summary>
-<p>
-<br>
-<a href="https://heroku.com/deploy">
-  <img src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy">
-</a>
-</p>
-## Deploy to Okteto
-Get the [Necessary Variables](#Necessary-Variables) and then click the button below!
+3. **Create a new app on Koyeb**:
+   - Go to the [Koyeb Control Panel](https://app.koyeb.com/)
+   - Click "Create App"
+   - Select "GitHub" as the deployment method
+   - Connect your GitHub account and select your forked repository
+   - Choose the main branch
+   - Set the name to "ultroid-userbot" or your preferred name
 
-[![Develop on Okteto](https://okteto.com/develop-okteto.svg)](https://cloud.okteto.com/deploy?repository=https://github.com/TeamUltroid/Ultroid)
+4. **Configure Environment Variables**:
+   Add the following environment variables in the Koyeb dashboard:
 
-## Deploy Locally
-- [Traditional Method](#local-deploy---traditional-method)
-- [Easy Method](#local-deploy---easy-method)
-- [Ultroid CLI](#ultroid-cli)
+   - `API_ID`: Your Telegram API ID from [my.telegram.org](https://my.telegram.org)
+   - `API_HASH`: Your Telegram API hash from [my.telegram.org](https://my.telegram.org)
+   - `SESSION`: Your Telethon or Pyrogram session string
+   - `REDIS_URI`: Redis database URL (you can use [upstash.com](https://upstash.com/) for a free Redis database)
+   - `REDIS_PASSWORD`: Redis database password
+   - `BOT_TOKEN`: Telegram bot token from [@BotFather](https://t.me/BotFather) (optional but recommended)
+   - `LOG_CHANNEL`: Telegram channel ID for logging (optional)
+   - Other optional variables as needed
 
-### Local Deploy - Easy Method
-- Linux - `wget -O locals.py https://git.io/JY9UM && python3 locals.py`
-- Windows - `cd desktop ; wget https://git.io/JY9UM -o locals.py ; python locals.py`
-- Termux - `wget -O install-termux https://tiny.ultroid.tech/termux && bash install-termux`
-
-### Local Deploy - Traditional Method
-- Get your [Necessary Variables](#Necessary-Variables)
-- Clone the repository:    
-`git clone https://github.com/TeamUltroid/Ultroid.git`
-- Go to the cloned folder:    
-`cd Ultroid`
-- Create a virtual env:      
-`virtualenv -p /usr/bin/python3 venv`
-`. ./venv/bin/activate`
-- Install the requirements:      
-`pip(3) install -U -r re*/st*/optional-requirements.txt`
-`pip(3) install -U -r requirements.txt`
-- Generate your `SESSION`:
-  - For Linux users:
-    `bash sessiongen`
-     or
-    `wget -O session.py https://git.io/JY9JI && python3 session.py`
-  - For Termux users:
-    `wget -O session.py https://git.io/JY9JI && python session.py`
-  - For Windows Users:
-    `cd desktop ; wget https://git.io/JY9JI -o ultroid.py ; python ultroid.py`
-- Fill your details in a `.env` file, as given in [`.env.sample`](https://github.com/TeamUltroid/Ultroid/blob/main/.env.sample).
-(You can either edit and rename the file or make a new file named `.env`.)
-- Run the bot:
-  - Linux Users:
-   `bash startup`
-  - Windows Users:
-    `python(3) -m pyUltroid`
-
----
-## Necessary Variables
-- `SESSION` - SessionString for your accounts login session. Get it from [here](#Session-String)
-
-One of the following database:
-- For **Redis** (tutorial [here](./resources/extras/redistut.md))
-  - `REDIS_URI` - Redis endpoint URL, from [redislabs](http://redislabs.com/).
-  - `REDIS_PASSWORD` - Redis endpoint Password, from [redislabs](http://redislabs.com/).
-- For **MONGODB**
-  - `MONGO_URI` - Get it from [mongodb](https://mongodb.com/atlas).
-- For **SQLDB**
-  - `DATABASE_URL`- Get it from [elephantsql](https://elephantsql.com).
+5. **Deploy the App**:
+   Click "Deploy" and wait for the deployment to complete.
 
 ## Session String
-Different ways to get your `SESSION`:
-* [![Run on Repl.it](https://replit.com/badge/github/TeamUltroid/Ultroid)](https://replit.com/@TeamUltroid/UltroidStringSession)
-* Linux : `wget -O session.py https://git.io/JY9JI && python3 session.py`
-* PowerShell : `cd desktop ; wget https://git.io/JY9JI ; python ultroid.py`
-* Termux : `wget -O session.py https://git.io/JY9JI && python session.py`
-* TelegramBot : [@SessionGeneratorBot](https://t.me/SessionGeneratorBot)
 
----
+You can generate a session string using:
+- Online: Visit [repl.it](https://replit.com/@TeamUltroid/UltroidStringSession)
+- Locally: Run `python3 -m pyUltroid sessiongen`
 
-# License
-[![License](https://www.gnu.org/graphics/agplv3-155x51.png)](LICENSE)   
-Ultroid is licensed under [GNU Affero General Public License](https://www.gnu.org/licenses/agpl-3.0.en.html) v3 or later.
+## Features
 
----
+- All original Ultroid features
+- Optimized for Koyeb's free tier
+- Automatic health checks to keep the bot running
+- Easy deployment process
 
-# Credits
-* [![TeamUltroid-Devs](https://img.shields.io/static/v1?label=Teamultroid&message=devs&color=critical)](https://t.me/UltroidDevs)
-* [Lonami](https://github.com/LonamiWebs/) for [Telethon.](https://github.com/LonamiWebs/Telethon)
-* [MarshalX](https://github.com/MarshalX) for [PyTgCalls.](https://github.com/MarshalX/tgcalls)
+## Support
 
-> Made with 💕 by [@TeamUltroid](https://t.me/TeamUltroid).    
+For support, join our Telegram group: [Your Support Group Link]
+
+## Credits
+
+- [Team Ultroid](https://github.com/TeamUltroid) for the original Ultroid UserBot
+- [ThePrateekBhatia](https://github.com/ThePrateekBhatia) for the Koyeb-specific modifications
+
+## License
+
+This project is licensed under the GNU Affero General Public License v3.0 - see the [LICENSE](LICENSE) file for details.

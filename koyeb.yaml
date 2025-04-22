@@ -1,0 +1,27 @@
+service:
+  name: ultroid-userbot
+  env: python
+  region: us-east-1
+  instance_type: free
+  scaling:
+    min_instances: 1
+    max_instances: 1
+  build:
+    builder: Dockerfile
+  ports:
+    - port: 8080
+      protocol: http
+  routes:
+    - path: /
+      port: 8080
+  health_check:
+    port: 8080
+    initial_delay: 30s
+    period: 15s
+    timeout: 10s
+    success_threshold: 1
+    failure_threshold: 3
+  env_vars:
+    - key: TZ
+      value: Asia/Kolkata
+  command: bash startup

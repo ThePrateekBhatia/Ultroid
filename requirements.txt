@@ -4,8 +4,39 @@ https://github.com/New-dev0/Telethon-Patch/archive/main.zip
 python-decouple
 python-dotenv
 telegraph
-enhancer
+enhancer>=0.3.4
 requests
 aiohttp
 catbox-uploader
 cloudscraper
+gitpython
+pillow>=9.0.0
+pymongo[srv]
+redis
+
+# Optional but recommended packages
+bs4
+pytz
+qrcode
+numpy>=1.21.2
+opencv-python-headless
+yt-dlp
+twikit
+lxml
+apscheduler
+psutil
+tabulate
+tgcrypto
+google-api-python-client
+youtube-search-python
+
+# Git-based packages
+git+https://github.com/ufoptg/akipy.git
+git+https://github.com/New-dev0/instagrapi.git@39df1b1#egg=instagrapi
+git+https://github.com/buddhhu/img2html.git@c44170d#egg=img2html
+htmlwebshot
+lottie
+oauth2client
+profanitydetector
+pypdf2>=1.26.0
+# -------------------------------------------------------#

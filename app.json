@@ -1,56 +1,63 @@
 {
-    "name": "Ultroid UserBot",
-    "description": "Pluggable telegram userbot, made in python using Telethon.",
-    "logo": "https://graph.org/file/031957757a4f6a5191040.jpg",
-    "keywords": [
-        "Telethon",
-        "telegram",
-        "userbot",
-        "python",
-        "ultroid"
-    ],
-    "repository": "https://github.com/TeamUltroid/Ultroid",
-    "website": "https://ultroid.tech",
-    "success_url": "https://t.me/TeamUltroid",
-    "stack": "container",
-    "env": {
-        "API_ID": {
-            "description": "You api id, from my.telegram.org or @ScrapperRoBot.",
-            "value": "", 
-            "required": false
-        },
-        "API_HASH": {
-            "description": "You api hash, from my.telegram.org or @ScrapperRoBot.",
-            "value": "",
-            "required": false
-        },
-        "SESSION": {
-            "description": "Session String (telethon or pyrogram) for your telegram user account. The userbot will NOT work without a session string!!",
-            "value": ""
-        },
-        "REDIS_URI": {
-            "description": "Redis endpoint URL, from redislabs.com",
-            "value": ""
-        },
-        "REDIS_PASSWORD": {
-            "description": "Redis endpoint password, from redislabs.com",
-            "value": ""
-        },
-        "HEROKU_API": {
-            "description": "Heroku API token. Mandatory for Heroku Deploy...",
-            "value": "",
-            "required": false
-        },
-        "HEROKU_APP_NAME": {
-            "description": "Name of your Heroku app, given in the first blank on this page. To be added if deploying to heroku ONLY.",
-            "value": "",
-            "required": false
-        }
+  "name": "Ultroid-Koyeb",
+  "description": "Telegram UserBot with Koyeb deployment support - Fork of TeamUltroid/Ultroid",
+  "logo": "https://graph.org/file/031957757a4f6a5191040.jpg",
+  "keywords": [
+    "telegram",
+    "userbot",
+    "ultroid",
+    "koyeb",
+    "python",
+    "telethon"
+  ],
+  "repository": "https://github.com/ThePrateekBhatia/Ultroid",
+  "website": "https://github.com/ThePrateekBhatia/Ultroid",
+  "success_url": "https://t.me/TheUltroid",
+  "stack": "container",
+  "env": {
+    "API_ID": {
+      "description": "Your API ID from my.telegram.org",
+      "required": true
     },
-    "formation": {
-        "ultroid": {
-            "quantity": 1,
-            "size": "eco"
-        }
+    "API_HASH": {
+      "description": "Your API HASH from my.telegram.org",
+      "required": true
+    },
+    "SESSION": {
+      "description": "Your string session",
+      "required": true
+    },
+    "REDIS_URI": {
+      "description": "Redis endpoint URL from upstash.com or similar provider",
+      "required": true
+    },
+    "REDIS_PASSWORD": {
+      "description": "Redis endpoint password from upstash.com or similar provider",
+      "required": true
+    },
+    "BOT_TOKEN": {
+      "description": "Bot token, get it from @BotFather",
+      "required": false
+    },
+    "LOG_CHANNEL": {
+      "description": "Channel ID for logging",
+      "required": false
+    },
+    "HEROKU_API": {
+      "description": "NOT REQUIRED FOR KOYEB - left for compatibility",
+      "required": false
+    },
+    "HEROKU_APP_NAME": {
+      "description": "NOT REQUIRED FOR KOYEB - left for compatibility",
+      "required": false
     }
+  },
+  "buildpacks": [
+    {
+      "url": "heroku/python"
+    },
+    {
+      "url": "https://github.com/jonathanong/heroku-buildpack-ffmpeg-latest"
+    }
+  ]
 }

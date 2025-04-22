@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Ultroid - UserBot
+# Copyright (C) 2021-2025 TeamUltroid
+# Extended for Koyeb deployment by ThePrateekBhatia
+#
+# This file is a part of < https://github.com/ThePrateekBhatia/Ultroid/ >
+# PLease read the GNU Affero General Public License in <https://www.github.com/TeamUltroid/Ultroid/blob/main/LICENSE/>.
+
+echo "
+            ┏┳┓╋┏┓╋╋╋╋┏┓┏┓
+            ┃┃┣┓┃┗┳┳┳━╋╋┛┃
+            ┃┃┃┗┫┏┫┏┫╋┃┃╋┃
+            ┗━┻━┻━┻┛┗━┻┻━┛
+
+      Koyeb Edition - https://github.com/ThePrateekBhatia/Ultroid
+
+"
+
+# Important for Koyeb to keep the app running
+mkdir -p /tmp/ultroid
+touch /tmp/ultroid/.deploy
+
+# Handle Python virtual environment if using one
+if [ -d "venv" ]; then
+    source venv/bin/activate
+fi
+
+if [ -f .env ] ; then  
+    set -o allexport
+    source .env
+    set +o allexport
+fi
+
+# Start the bot
+python3 -m pyUltroid
