@@ -9,3 +9,9 @@ requests
 aiohttp
 catbox-uploader
 cloudscraper
+flask
+pymongo[srv]
+
+# Optional Requirements here.
+google_trans_new
+twikit

@@ -16,4 +16,22 @@ echo "
 
 "
 if [ -f .env ] ; then  set -o allexport; source .env; set +o allexport ; fi
-if [ $SESSION1 ] ; then wget https://gist.github.com/1Danish-00/6554f034549197e5824972b01f631e0c/raw/main.py && python3 main.py ; else python3 -m pyUltroid ; fi
+
+# Start the web server in the background for Koyeb health checks
+echo "Starting web server on port 8080 for health checks..."
+python3 web_server.py &
+WEBSERVER_PID=$!
+
+# Wait a moment to ensure the web server is running
+sleep 2
+
+# Start the Ultroid bot
+echo "Starting Ultroid bot..."
+if [ $SESSION1 ] ; then 
+    wget https://gist.github.com/1Danish-00/6554f034549197e5824972b01f631e0c/raw/main.py && python3 main.py
+else 
+    python3 -m pyUltroid
+fi
+
+# If the bot exits, also kill the web server to prevent orphaned processes
+kill $WEBSERVER_PID

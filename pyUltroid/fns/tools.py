@@ -602,12 +602,13 @@ def telegraph_client():
         return
     if TELEGRAPH:
         return TELEGRAPH[0]
-
+        
     from .. import udB, ultroid_bot
 
     token = udB.get_key("_TELEGRAPH_TOKEN")
     TELEGRAPH_DOMAIN = udB.get_key("GRAPH_DOMAIN")
-    TelegraphClient = Telegraph(token, domain=TELEGRAPH_DOMAIN or "graph.org")
+    # The telegraph library doesn't support domain parameter
+    TelegraphClient = Telegraph(token)
     if token:
         TELEGRAPH.append(TelegraphClient)
         return TelegraphClient
