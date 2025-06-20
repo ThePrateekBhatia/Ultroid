@@ -185,9 +185,7 @@ if run_as_module:
                 await eod(ok, f"✓ `Ultroid - Installed`: `{plug}` ✓")
 
     async def heroku_logs(event):
-        """
-        post heroku logs
-        """
+        
         from .. import LOGS
 
         xx = await eor(event, "`Processing...`")
@@ -229,12 +227,17 @@ if run_as_module:
             f"{sys.executable} -m pip install --no-cache-dir -r requirements.txt"
         )
 
+
     @run_async
-    def gen_chlog(repo, diff):
+    def gen_chlog(repo, diff, repo_url=None):
         """Generate Changelogs..."""
-        UPSTREAM_REPO_URL = (
-            Repo().remotes[0].config_reader.get("url").replace(".git", "")
-        )
+        from .. import udB
+        if not repo_url:
+            UPSTREAM_REPO_URL = (
+                udB.get_key("UPSTREAM_REPO") or repo.remotes[0].config_reader.get("url")
+            ).replace(".git", "")
+        else:
+            UPSTREAM_REPO_URL = repo_url.replace(".git", "")
         ac_br = repo.active_branch.name
         ch_log = tldr_log = ""
         ch = f"<b>Ultroid {ultroid_version} updates for <a href={UPSTREAM_REPO_URL}/tree/{ac_br}>[{ac_br}]</a>:</b>"
@@ -263,7 +266,7 @@ async def bash(cmd, run_code=0):
     err = stderr.decode().strip() or None
     out = stdout.decode().strip()
     if not run_code and err:
-        if match := re.match("\/bin\/sh: (.*): ?(\w+): not found", err):
+        if match := re.match(r"/bin/sh: (.*): ?(\w+): not found", err):
             return out, f"{match.group(2).upper()}_NOT_FOUND"
     return out, err
 
@@ -272,36 +275,50 @@ async def bash(cmd, run_code=0):
 # Will add in class
 
 
-async def updater():
-    from .. import LOGS
+async def updater(repo_url=None):
+    from .. import LOGS, udB
+
+    if not Repo:
+        LOGS.info("Git is not installed.")
+        return
 
     try:
-        off_repo = Repo().remotes[0].config_reader.get("url").replace(".git", "")
-    except Exception as er:
-        LOGS.exception(er)
-        return
-    try:
         repo = Repo()
-    except NoSuchPathError as error:
-        LOGS.info(f"`directory {error} is not found`")
-        Repo().__del__()
-        return
-    except GitCommandError as error:
-        LOGS.info(f"`Early failure! {error}`")
-        Repo().__del__()
-        return
-    except InvalidGitRepositoryError:
-        repo = Repo.init()
-        origin = repo.create_remote("upstream", off_repo)
-        origin.fetch()
-        repo.create_head("main", origin.refs.main)
-        repo.heads.main.set_tracking_branch(origin.refs.main)
-        repo.heads.main.checkout(True)
+    except (NoSuchPathError, GitCommandError, InvalidGitRepositoryError) as e:
+        LOGS.info(f"Could not initialize git repo: {e}")
+        if isinstance(e, InvalidGitRepositoryError):
+            repo = Repo.init()
+            off_repo = (
+                repo_url or udB.get_key("UPSTREAM_REPO") or "https://github.com/ThePrateekBhatia/Ultroid"
+            )
+            if "upstream" not in repo.remotes:
+                origin = repo.create_remote("upstream", off_repo)
+                origin.fetch()
+                repo.create_head("main", origin.refs.main)
+                repo.heads.main.set_tracking_branch(origin.refs.main)
+                repo.heads.main.checkout(True)
+        else:
+            return
+
     ac_br = repo.active_branch.name
-    repo.create_remote("upstream", off_repo) if "upstream" not in repo.remotes else None
+
+    if not repo_url:
+        repo_url = udB.get_key("UPSTREAM_REPO") or repo.remotes[0].config_reader.get("url")
+
+    if "upstream" not in repo.remotes:
+        repo.create_remote("upstream", repo_url)
+    else:
+        repo.remote("upstream").set_url(repo_url)
+
     ups_rem = repo.remote("upstream")
-    ups_rem.fetch(ac_br)
-    changelog, tl_chnglog = await gen_chlog(repo, f"HEAD..upstream/{ac_br}")
+
+    try:
+        ups_rem.fetch(ac_br)
+    except GitCommandError as e:
+        LOGS.info(f"Failed to fetch from upstream remote: {e}")
+        return False
+
+    changelog, tl_chnglog = await gen_chlog(repo, f"HEAD..upstream/{ac_br}", repo_url)
     return bool(changelog)
 
 

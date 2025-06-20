@@ -10,8 +10,10 @@ from . import get_help
 __doc__ = get_help("help_bot")
 
 import os
+import re
 import sys
 import time
+import asyncio
 from platform import python_version as pyver
 from random import choice
 
@@ -27,6 +29,7 @@ from . import HOSTED_ON, LOGS
 
 try:
     from git import Repo
+    from git.exc import InvalidGitRepositoryError, NoSuchPathError
 except ImportError:
     LOGS.error("bot: 'gitpython' module not found!")
     Repo = None
@@ -70,7 +73,7 @@ def ULTPIC():
 
 buttons = [
     [
-        Button.url(get_string("bot_3"), "https://github.com/TeamUltroid/Ultroid"),
+        Button.url(get_string("bot_3"), "https://github.com/ThePrateekBhatia/Ultroid"),
         Button.url(get_string("bot_4"), "t.me/UltroidSupportChat"),
     ]
 ]
@@ -317,50 +320,242 @@ async def inline_alive(ult):
     await ult.answer(result)
 
 
-@ultroid_cmd(pattern="update( (.*)|$)")
-async def _(e):
-    xx = await e.eor(get_string("upd_1"))
-    if e.pattern_match.group(1).strip() and (
-        "fast" in e.pattern_match.group(1).strip()
-        or "soft" in e.pattern_match.group(1).strip()
-    ):
-        await bash("git pull -f && pip3 install -r requirements.txt")
-        await bash("pip3 install -r requirements.txt --break-system-packages")
-        call_back()
-        await xx.edit(get_string("upd_7"))
-        os.execl(sys.executable, "python3", "-m", "pyUltroid")
-        # return
-    m = await updater()
-    branch = (Repo.init()).active_branch
-    if m:
-        x = await asst.send_file(
-            udB.get_key("LOG_CHANNEL"),
-            ULTPIC(),
-            caption="• **Update Available** •",
-            force_document=False,
-            buttons=Button.inline("Changelogs", data="changes"),
+@ultroid_cmd(pattern="setrepo( (.*)|$)")
+async def set_repo(event):
+    """
+    Sets the upstream repository for updates.
+    Usage: .setrepo <your_fork_url>
+    """
+    repo_url = event.pattern_match.group(2)
+    if not repo_url:
+        return await eor(event, "Please provide your forked repository URL. Example: `.setrepo https://github.com/user/repo`")
+    if not repo_url.endswith(".git"):
+        repo_url += ".git"
+    udB.set_key("UPSTREAM_REPO", repo_url)
+    await eor(event, f"Upstream repository has been set to: `{repo_url}`")
+
+
+async def get_updates(ulttext, repo_url):
+    """Checks for updates and returns repo, is_new, and changelog."""
+    try:
+        repo = Repo()
+    except (InvalidGitRepositoryError, NoSuchPathError):
+        await ulttext.edit(
+            "`No .git directory found. Please re-clone Ultroid.`"
         )
-        Link = x.message_link
-        await xx.edit(
-            f'<strong><a href="{Link}">[ChangeLogs]</a></strong>',
-            parse_mode="html",
+        return None, False, None
+
+    branch = repo.active_branch.name
+
+    try:
+        upstream_remote = repo.remote("upstream")
+        upstream_remote.set_url(repo_url)
+    except ValueError:
+        upstream_remote = repo.create_remote("upstream", repo_url)
+
+    try:
+        await ulttext.edit(f"`Fetching updates from {repo_url}...`")
+        upstream_remote.fetch(branch)
+    except Exception as e:
+        try:
+            repo.delete_remote("upstream")
+        except Exception as del_e:
+            LOGS.error(f"Failed to delete remote 'upstream': {del_e}")
+        await ulttext.edit(f"**Update failed!**\n\n**Error:**\n`{e}`")
+        return None, False, None
+
+    try:
+        commits_behind = list(repo.iter_commits(f'{branch}..upstream/{branch}'))
+    except Exception:
+        commits_behind = [1]
+
+    if not commits_behind:
+        return repo, False, None
+
+    changelog = f"**New updates are available for [{branch}]({repo_url.replace('.git', '')}/tree/{branch})!**\n\n**Changelog:**\n"
+    for commit in repo.iter_commits(f'{branch}..upstream/{branch}'):
+        changelog += f"  •  `{commit.summary}` by __{commit.author.name}__\n"
+
+    return repo, True, changelog
+
+
+def launch_update_script(repo_url=None):
+    """Launch the external update script and shutdown the bot."""
+    import subprocess
+    import sys
+    
+    script_path = "update_script.py"
+    
+    # Prepare command arguments
+    cmd = [sys.executable, script_path]
+    if repo_url:
+        cmd.append(repo_url)
+    
+    # Add original start arguments so the script knows how to restart
+    if len(sys.argv) > 1:
+        cmd.extend(sys.argv[1:])
+    
+    # Launch the update script
+    subprocess.Popen(cmd, cwd=os.getcwd())
+    
+    # Shutdown the bot
+    os._exit(0)
+
+
+@ultroid_cmd(
+    pattern="update(.*)",
+    command="update",
+    description="Update your Ultroid.",
+)
+async def updater(event):
+    """Usage: {tr}update [now] [original]
+
+Description: Checks for updates for your userbot.
+
+• `{tr}update`: Checks for updates from your forked repo (if set), otherwise from original.
+• `{tr}update now`: Forces an immediate update using external script from the configured repo.
+• `{tr}update original`: Checks for updates from the official Ultroid repo.
+• `{tr}update now original`: Forces an immediate update from the official Ultroid repo.
+
+Note: Use `{tr}setrepo <your_fork_url>` to update from your own fork."""
+    if Var.HEROKU_API:
+        return await event.eor(
+            "Heroku user! Please update from Heroku dashboard.",
+        )
+
+    ulttext = await event.eor("`Checking for updates, please wait...`")
+    args = event.pattern_match.group(1).strip().split()
+    is_now = "now" in args
+    is_original = "original" in args
+
+    repo_url = (
+        "https://github.com/ThePrateekBhatia/Ultroid.git"
+        if is_original
+        else udB.get_key("UPSTREAM_REPO")
+        or "https://github.com/overspend1/Ultroid-fork.git"
+    )
+
+    if is_now:
+        # Use external script for immediate update
+        await ulttext.edit(
+            "🔄 **Starting update process...**\n\n"
+            f"📦 Repository: `{repo_url}`\n"
+            "⚡ Using external script for reliable update\n\n"
+            "🤖 Bot will shutdown and restart automatically after update completes."
+        )
+        
+        # Wait a moment for the message to be sent
+        await asyncio.sleep(2)
+        
+        # Launch external update script and shutdown
+        launch_update_script(repo_url)
+        return
+
+    # Regular update check (non-destructive)
+    off_repo, is_new, changelog = await get_updates(ulttext, repo_url=repo_url)
+
+    if not off_repo:
+        return
+
+    branch = off_repo.active_branch.name
+
+    if is_new:
+        # Show update available with options
+        buttons = [
+            [
+                Button.inline("🔄 Update Now", data=f"update_now|{repo_url}"),
+                Button.inline("📋 View Changes", data=f"update_changelog|{repo_url}"),
+            ],
+            [Button.inline("❌ Dismiss", data="close_update")],
+        ]
+        
+        m = await asst.send_message(
+            udB.get_key("LOG_CHANNEL"),
+            f"🆕 **Update Available!**\n\n"
+            f"📦 Repository: `{repo_url}`\n"
+            f"🌿 Branch: `{branch}`\n\n"
+            f"Use the buttons below to update or view changes.",
+            buttons=buttons,
+        )
+        Link = m.message_link
+        await ulttext.edit(
+            f'**🆕 Update available!**\n\n'
+            f'📦 Repository: `{repo_url.replace(".git", "")}`\n'
+            f'🌿 Branch: `{branch}`\n\n'
+            f'[📋 View Options & Update]({Link})',
+            parse_mode="md",
             link_preview=False,
         )
     else:
-        await xx.edit(
-            f'<code>Your BOT is </code><strong>up-to-date</strong><code> with </code><strong><a href="https://github.com/TeamUltroid/Ultroid/tree/{branch}">[{branch}]</a></strong>',
-            parse_mode="html",
+        await ulttext.edit(
+            f'✅ **Your bot is up-to-date!**\n\n'
+            f'📦 Repository: `{repo_url.replace(".git", "")}`\n'
+            f'🌿 Branch: `{branch}`',
+            parse_mode="md",
             link_preview=False,
         )
 
+    try:
+        off_repo.delete_remote("upstream")
+    except Exception:
+        pass
 
-@callback("updtavail", owner=True)
-async def updava(event):
-    await event.delete()
-    await asst.send_file(
-        udB.get_key("LOG_CHANNEL"),
-        ULTPIC(),
-        caption="• **Update Available** •",
-        force_document=False,
-        buttons=Button.inline("Changelogs", data="changes"),
+
+@callback(re.compile(b"update_now\\|(.*)"))
+async def update_now_callback(event):
+    repo_url = event.data_match.group(1).decode("utf-8")
+    await event.edit(
+        "🔄 **Starting update process...**\n\n"
+        f"📦 Repository: `{repo_url}`\n"
+        "⚡ Using external script for reliable update\n\n"
+        "🤖 Bot will shutdown and restart automatically after update completes."
     )
+    
+    # Wait a moment for the message to be sent
+    await asyncio.sleep(2)
+    
+    # Launch external update script and shutdown
+    launch_update_script(repo_url)
+
+
+@callback(re.compile(b"update_changelog\\|(.*)"))
+async def update_changelog_callback(event):
+    repo_url = event.data_match.group(1).decode("utf-8")
+    
+    # Get changelog
+    try:
+        repo = Repo()
+        branch = repo.active_branch.name
+        
+        # Set up upstream remote
+        try:
+            upstream_remote = repo.remote("upstream")
+            upstream_remote.set_url(repo_url)
+        except ValueError:
+            upstream_remote = repo.create_remote("upstream", repo_url)
+        
+        # Fetch updates
+        upstream_remote.fetch(branch)
+        
+        # Generate changelog
+        changelog = f"**📋 Changelog for [{branch}]({repo_url.replace('.git', '')}/tree/{branch})**\n\n"
+        for commit in repo.iter_commits(f'{branch}..upstream/{branch}'):
+            changelog += f"• `{commit.summary}` by __{commit.author.name}__\n"
+        
+        # Cleanup
+        repo.delete_remote("upstream")
+        
+        await event.edit(
+            changelog,
+            buttons=[
+                [Button.inline("🔄 Update Now", data=f"update_now|{repo_url}")],
+                [Button.inline("❌ Close", data="close_update")],
+            ],
+        )
+    except Exception as e:
+        await event.edit(f"**Error getting changelog:**\n`{e}`")
+
+
+@callback("close_update")
+async def close_update_callback(event):
+    await event.delete()
