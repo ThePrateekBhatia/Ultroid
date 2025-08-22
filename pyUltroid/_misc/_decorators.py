@@ -83,16 +83,20 @@ def ultroid_cmd(
                 chat_id = ult.chat_id
                 command_name = pattern if pattern else ult.text.split()[0].lstrip(HNDLR)
                 chat_name = get_display_name(ult.chat)
-                LOGS.info(f"Command '{command_name}' executed by user ID {user_id} in chat {chat_id} ({chat_name})")
+                LOGS.info(
+                    f"Command '{command_name}' executed by user ID {user_id} in chat {chat_id} ({chat_name})"
+                )
                 log_channel = udB.get_key("LOG_CHANNEL")
                 if log_channel:
                     try:
                         await asst.send_message(
                             log_channel,
-                            f"Command '{command_name}' executed by user ID {user_id} in chat {chat_id} ({chat_name})"
+                            f"Command '{command_name}' executed by user ID {user_id} in chat {chat_id} ({chat_name})",
                         )
                     except Exception as e:
-                        LOGS.warning(f"Failed to send command log to log channel {log_channel}: {e}")
+                        LOGS.warning(
+                            f"Failed to send command log to log channel {log_channel}: {e}"
+                        )
             if not ult.out:
                 if owner_only:
                     return
@@ -128,7 +132,7 @@ def ultroid_cmd(
             except FloodWaitError as fwerr:
                 await asst.send_message(
                     udB.get_key("LOG_CHANNEL"),
-                    f"`FloodWaitError:\n{str(fwerr)}\n\nSleeping for {tf((fwerr.seconds + 10)*1000)}`",
+                    f"`FloodWaitError:\n{str(fwerr)}\n\nSleeping for {tf((fwerr.seconds + 10) * 1000)}`",
                 )
                 await ultroid_bot.disconnect()
                 await asyncio.sleep(fwerr.seconds + 10)
